@@ -1,13 +1,13 @@
 [
- {
-  "date": "2026-11-18",
-  "counts": {
-   "REAL-ME-Free-Loop-Kit-syrebeats.zip": 13,
-   "SONETIQ_AMETHYST_1.0.0_Setup.exe": 5,
-   "SONETIQ_Bundle_1.1.0_Setup.exe": 4,
-   "SONETIQ_GARNET_1.0.0_Setup.exe": 4,
-   "SONETIQ_RUBY_1.0.0_Setup.exe": 4,
-   "seraph-free.zip": 7
+  {
+    "date": "2026-11-18",
+    "counts": {
+      "REAL-ME-Free-Loop-Kit-syrebeats.zip": 13,
+      "SONETIQ_AMETHYST_1.0.0_Setup.exe": 5,
+      "SONETIQ_Bundle_1.1.0_Setup.exe": 4,
+      "SONETIQ_GARNET_1.0.0_Setup.exe": 4,
+      "SONETIQ_RUBY_1.0.0_Setup.exe": 4,
+      "seraph-free.zip": 7
+    }
   }
- }
 ]
