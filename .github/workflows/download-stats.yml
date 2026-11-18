@@ -1,0 +1,47 @@
+# Saves the download count of every release file once a day to stats/history.json
+# on the `stats` branch, so syrebeats.com/stats/ can chart downloads per day.
+# GitHub only exposes running totals; this history is what makes daily numbers possible.
+name: Download stats
+
+on:
+  schedule:
+    - cron: '5 0 * * *'   # every day at 00:05 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: download-stats
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save today's download counts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          url="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          if git clone --quiet --depth 1 --branch stats "$url" stats; then
+            cd stats
+          else
+            git init -q stats && cd stats
+            git checkout -q --orphan stats
+            git remote add origin "$url"
+            echo '[]' > history.json
+          fi
+          today="$(date -u +%F)"
+          gh api "repos/${REPO}/releases?per_page=100" \
+            --jq '[.[] | .assets[] | {key: .name, value: .download_count}] | from_entries' > now.json
+          jq --arg d "$today" --slurpfile now now.json \
+            '[.[] | select(.date != $d)] + [{date: $d, counts: $now[0]}]' history.json > next.json
+          mv next.json history.json && rm now.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add history.json
+          git diff --cached --quiet || git commit -qm "Download stats ${today}"
+          git push -q origin stats
