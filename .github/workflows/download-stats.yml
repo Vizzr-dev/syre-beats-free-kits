@@ -1,4 +1,4 @@
-# Saves the download count of every release file once a day to stats/history.json
+# Saves the download count of every release file (this repo and SYNTRA LAB's) once a day
 # on the `stats` branch, so syrebeats.com/stats/ can chart downloads per day.
 # GitHub only exposes running totals; this history is what makes daily numbers possible.
 name: Download stats
@@ -35,8 +35,10 @@ jobs:
             echo '[]' > history.json
           fi
           today="$(date -u +%F)"
-          gh api "repos/${REPO}/releases?per_page=100" \
-            --jq '[.[] | .assets[] | {key: .name, value: .download_count}] | from_entries' > now.json
+          # This repo plus every other public repo whose files syrebeats.com links to (SYNTRA LAB).
+          for repo in "$REPO" Vizzr-dev/syntra-lab-download; do
+            gh api "repos/${repo}/releases?per_page=100"
+          done | jq -s '[.[][] | .assets[] | {key: .name, value: .download_count}] | from_entries' > now.json
           jq --arg d "$today" --slurpfile now now.json \
             '[.[] | select(.date != $d)] + [{date: $d, counts: $now[0]}]' history.json > next.json
           mv next.json history.json && rm now.json
